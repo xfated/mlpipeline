@@ -1,0 +1,1 @@
+docker run -p 8501:8501 --name tfserving_yolov5s2 --mount type=bind,source=C:/Users/User/Documents/portfolio/MLPipeline/tf_serving/yolov5s/,target=/models/yolov5s -e MODEL_NAME=yolov5s -t tensorflow/serving
