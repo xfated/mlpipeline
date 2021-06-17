@@ -1,0 +1,5 @@
+{
+    "python.pythonPath": "C:\\Users\\User\\anaconda3\\envs\\MLPipeline\\python.exe",
+    "python.defaultInterpreterPath": "C:\\Users\\User\\anaconda3\\envs\\MLPipeline\\python.exe",
+    "terminal.integrated.automationShell.windows": ["/K", "C:\\Users\\User\\anaconda3\\Scripts\\activate.bat C:\\Users\\User\\anaconda3 & conda activate MLPipeline"]
+}
