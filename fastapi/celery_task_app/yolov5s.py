@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
 import requests
-import base64
 import json
 import numpy as np
 import cv2
-
-url = 'http://localhost:8501/v1/models/yolov5s:predict'
+import base64
 
 import numpy as np
 import time
@@ -22,12 +20,11 @@ class Yolov5s:
         self.device = 'cpu'
         self.classes = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
 
-    def predict(self, img_path, conf_thres=0.25, iou_thres=0.45, agnostic_nms=False, max_det=1000):
-        img = cv2.imread(img_path)
-        orig_shape = img.shape
-        img = self._preproc(img)
+    def predict(self, img, url, conf_thres=0.25, iou_thres=0.45, agnostic_nms=False, max_det=1000):
+        _, c, h, w = img.shape
+        orig_shape = (h, w, c)
 
-        # Request from tensorflow serving
+        # Request from tensorflow 
         # Image is (1, 3, 640, 640)
         data = json.dumps({
             "signature_name": "serving_default",
@@ -69,14 +66,14 @@ class Yolov5s:
         
         # create dict for res
         res = dict()
-        res['bbox'] = bbox.numpy()
+        res['bbox'] = bbox.numpy().tolist()
         res['class'] = self.classes[int(pred[5].item())]
         res['conf'] = pred[4].item()
 
         return res
 
     # preproc img source to img
-    def _preproc(self, img):
+    def preproc(self, img):
         img = self._resize(img)
         # cv2.imwrite('test.jpg',img)
         img = img.astype(np.float32)
@@ -84,6 +81,16 @@ class Yolov5s:
         img = np.transpose(img, (2,0,1))
         img = np.expand_dims(img, 0)
         return img
+
+    # Encode image to base64 string
+    def encode_base64(self, img):
+        img = cv2.imencode('.jpg', img)[1]
+        return base64.b64encode(img).decode()
+
+    # Decode image from base64 string
+    def decode_base64(self, img_base64):
+        img_nparray = np.frombuffer(base64.b64decode(img_base64), np.uint8)
+        return cv2.imdecode(img_nparray, cv2.IMREAD_COLOR)
 
     # resize to target shape while maintaining aspect ratio. 
     # input:  (h, w, c)
