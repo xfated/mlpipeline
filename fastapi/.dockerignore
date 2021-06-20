@@ -1,0 +1,6 @@
+**/__pycache__
+
+app/testApi.py
+
+app/celery_task_app/instr.sh
+app/celery_task_app/testBase64.py

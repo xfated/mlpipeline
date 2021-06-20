@@ -109,6 +109,61 @@ class Yolov5s:
         new_img[:new_height,:new_width, :] = resized
         return new_img
 
+    def nms(bounding_boxes, confidence_score, threshold):
+        # If no bounding boxes, return empty list
+        if len(bounding_boxes) == 0:
+            return [], []
+
+        # Bounding boxes
+        boxes = np.array(bounding_boxes)
+
+        # coordinates of bounding boxes
+        start_x = boxes[:, 0]
+        start_y = boxes[:, 1]
+        end_x = boxes[:, 2]
+        end_y = boxes[:, 3]
+
+        # Confidence scores of bounding boxes
+        score = np.array(confidence_score)
+
+        # Picked bounding boxes
+        picked_boxes = []
+        picked_score = []
+
+        # Compute areas of bounding boxes
+        areas = (end_x - start_x + 1) * (end_y - start_y + 1)
+
+        # Sort by confidence score of bounding boxes
+        order = np.argsort(score)
+
+        # Iterate bounding boxes
+        while order.size > 0:
+            # The index of largest confidence score
+            index = order[-1]
+
+            # Pick the bounding box with largest confidence score
+            picked_boxes.append(bounding_boxes[index])
+            picked_score.append(confidence_score[index])
+
+            # Compute ordinates of intersection-over-union(IOU)
+            x1 = np.maximum(start_x[index], start_x[order[:-1]])
+            x2 = np.minimum(end_x[index], end_x[order[:-1]])
+            y1 = np.maximum(start_y[index], start_y[order[:-1]])
+            y2 = np.minimum(end_y[index], end_y[order[:-1]])
+
+            # Compute areas of intersection-over-union
+            w = np.maximum(0.0, x2 - x1 + 1)
+            h = np.maximum(0.0, y2 - y1 + 1)
+            intersection = w * h
+
+            # Compute the ratio between intersection and union
+            ratio = intersection / (areas[index] + areas[order[:-1]] - intersection)
+
+            left = np.where(ratio < threshold)
+            order = order[left]
+
+        return picked_boxes, picked_score
+        
     # taken from https://github.com/ultralytics/yolov5
     def _xywh2xyxy(self, x):
         # Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right
@@ -118,6 +173,7 @@ class Yolov5s:
         y[:, 2] = x[:, 0] + x[:, 2] / 2  # bottom right x
         y[:, 3] = x[:, 1] + x[:, 3] / 2  # bottom right y
         return y
+
 
     # taken from https://github.com/ultralytics/yolov5
     def _bbox_iou(self, box1, box2, x1y1x2y2=True, GIoU=False, DIoU=False, CIoU=False, eps=1e-7):
@@ -174,6 +230,12 @@ class Yolov5s:
         nc = prediction.shape[2] - 5  # number of classes
         xc = prediction[..., 4] > conf_thres  # candidates
 
+        ''' Shapes 
+        prediction: nc = (1, 25200, 85)
+        nc = 1
+        xc = (1, 25200)
+        '''
+
         # Checks
         assert 0 <= conf_thres <= 1, f'Invalid Confidence threshold {conf_thres}, valid values are between 0.0 and 1.0'
         assert 0 <= iou_thres <= 1, f'Invalid IoU {iou_thres}, valid values are between 0.0 and 1.0'
@@ -185,13 +247,22 @@ class Yolov5s:
         redundant = True  # require redundant detections
         multi_label &= nc > 1  # multiple labels per box (adds 0.5ms/img)
         merge = False  # use merge-NMS
-
+       
+        multi_label = True
         t = time.time()
         output = [torch.zeros((0, 6), device=self.device)] * prediction.shape[0]
         for xi, x in enumerate(prediction):  # image index, image inference
             # Apply constraints
             # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
-            x = x[xc[xi]]  # confidence
+            x = x[xc[xi]]  # confidence x = [num_boxes, res]
+
+            ''' Shapes
+            x (before) = 25200, 85
+
+            xi = 1
+            xc = (1, 25200)
+            x = (6, 85)
+            '''
 
             # Cat apriori labels if autolabelling
             if labels and len(labels[xi]):
@@ -215,7 +286,21 @@ class Yolov5s:
             # Detections matrix nx6 (xyxy, conf, cls)
             if multi_label:
                 i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
+                '''
+                Get coordinates of all classes that have larger conf than threshold
+                (returns non-zero elements)
+                i = x coord
+                j = y coord
+                '''
                 x = torch.cat((box[i], x[i, j + 5, None], j[:, None].float()), 1)
+                '''
+                x (bef) = (6,85)
+                box[i] = (6,4)
+                x[i, j+5, None] = (6,1)
+                j[:, None] = (6,1)
+                x (aft) = (6, 6) 
+                '''
+                
             else:  # best class only
                 conf, j = x[:, 5:].max(1, keepdim=True)
                 x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
@@ -236,6 +321,9 @@ class Yolov5s:
                 x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
 
             # Batched NMS
+            '''
+            c = (6,1) (class index * 4096)
+            '''
             c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
             boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
             i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS

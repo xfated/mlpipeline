@@ -40,5 +40,4 @@ class PredictTask(Task):
 )
 def predict_yolov5s(self, img_base64, url='http://localhost:8501/v1/models/yolov5s:predict'):
     img = self.model.decode_base64(img_base64)
-    img = self.model.preproc(img)
     return self.model.predict(img, url)

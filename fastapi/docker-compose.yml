@@ -2,4 +2,7 @@ version: "1.0"
 
 services:
     redis:
-        image: "redis:5.0.4-stretc"            
+        image: "redis:alpine3.13"
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+          
