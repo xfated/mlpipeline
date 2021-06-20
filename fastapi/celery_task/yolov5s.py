@@ -1,14 +1,10 @@
-import matplotlib.pyplot as plt
 import requests
 import json
 import numpy as np
 import cv2
 import base64
 
-import numpy as np
 import time
-import math
-import cv2 
 
 class Yolov5s:
     """ Wrapper for loading and serving yolov5s model"""
@@ -20,9 +16,10 @@ class Yolov5s:
 
     def predict(self, img, url, conf_thres=0.25, iou_thres=0.45):
         orig_shape = img.shape
-
         img = self._preproc(img)
-    
+
+        start = time.time()
+
         # Request from tensorflow 
         # Image is (1, 3, 640, 640)
         data = json.dumps({
@@ -43,7 +40,8 @@ class Yolov5s:
         for pred in preds:
             result.append(self._proc_preds(pred[0], orig_shape))
 
-        return result
+        time_taken = (time.time() - start)
+        return result, time_taken
 
     def _proc_preds(self, pred, orig_shape, model_size = None):
         if model_size is None:

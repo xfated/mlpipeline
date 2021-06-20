@@ -1,8 +1,61 @@
-version: "1.0"
+version: "3.7"
 
 services:
+    rabbitmq:
+        image: "rabbitmq_data:3.8.17"
+        ports:
+            - "5672:5672"
+        volumes:
+            - "rabbitmq_data:/data/rabbitmq"
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+         
     redis:
         image: "redis:alpine3.13"
+        ports:
+            - "6379:6379"
         restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
-        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
-          
+        volumes:
+            - "redis_data:/data/redis"
+        
+    celery:
+        build:
+            dockerfile: DockerfileCelery
+            context: app/celery_task_app/
+        depends_on:
+            - rabbitmq
+            - redis
+        environment:
+            - CELERY_BROKER_URL=pyamqp://guest@localhost//
+            - CELERY_BACKEND_URL=redis://localhost
+        volumes:
+            - "./:/app"
+        command: ["celery", "-A", "celery_task_app.tasks", "worker", "--loglevel=INFO"]
+        
+    fastapi:
+        build:
+            dockerfile: DockerfileFastapi
+            context: .
+        ports:
+            - "8000:8000"
+        depends_on:
+            - rabbitmq
+            - redis
+        volumes:
+            - "./:/app"
+        command: "uvicorn main:app --host 0.0.0.0 --port 8000"
+
+    worker:
+        build: .
+        depends_on:
+            - rabbitmq
+            - redis
+        volumes:
+            - "./:/app"
+        command: "celery -A celery_task_app.tasks worker --loglevel=INFO"
+            
+volumes:
+    rabbitmq_data:
+        driver: local
+    redis_data:
+        driver: local
+        

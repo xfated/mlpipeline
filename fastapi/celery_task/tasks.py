@@ -1,16 +1,8 @@
 import logging
-from celery import Celery
-from celery_task_app.yolov5s import *
+from celery_task.yolov5s import *
 from celery import Task
 
-BROKER_URI = 'pyamqp://guest@localhost//'
-BACKEND_URI = 'redis://localhost'
-
-app = Celery(
-    'tasks', 
-    broker=BROKER_URI,
-    backend=BACKEND_URI
-)
+from celery_task.worker import celery
 
 class PredictTask(Task):
     """
@@ -34,10 +26,11 @@ class PredictTask(Task):
 
 
 # img: base64 encoded image 
-@app.task(ignore_result=False,
+@celery.task(ignore_result=False,
         bind=True,
         base=PredictTask,
 )
-def predict_yolov5s(self, img_base64, url='http://localhost:8501/v1/models/yolov5s:predict'):
+def predict_yolov5s(self, img_base64, url='http://localhost:8501/v1/models/yolov5s:predict'): # 'http://localhost:8501/v1/models/yolov5s:predict'
     img = self.model.decode_base64(img_base64)
-    return self.model.predict(img, url)
+    results, time_taken = self.model.predict(img, url)
+    return {'results': results, 'time_taken': time_taken}

@@ -10,9 +10,14 @@ class Task(BaseModel):
     status: str
 
 class Prediction(BaseModel):
-    """ Prediction task result """
-    task_id: str
+    """ Single prediction task result """
     bbox: List[int]
     cat: str
     probability: float
     
+class PredictionResponse(BaseModel):
+    """ Prediction task response """
+    task_id: str
+    preds: List[Prediction]
+    time_taken:float
+

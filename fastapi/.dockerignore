@@ -1,6 +1,10 @@
 **/__pycache__
+**/misc
+
+*.sh
 
 app/testApi.py
 
 app/celery_task_app/instr.sh
 app/celery_task_app/testBase64.py
+app/celery_task_app/yolov5s_torch.py
