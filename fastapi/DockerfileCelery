@@ -1,5 +1,4 @@
 FROM python:3.9.5-slim-buster
-WORKDIR /app
 
 # RUN apk add --no-cache --update \
 #    python3 python3-dev gcc \
@@ -10,14 +9,14 @@ COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip
 
 # For cv2
-RUN apt-get update ##[edited]
+RUN apt-get update
 RUN apt-get install ffmpeg libsm6 libxext6  -y
 
 RUN pip install -r requirements.txt
   
 EXPOSE 8000
 
-RUN mkdir celery_task_app
-COPY ./ /app/celery_task_app
+RUN mkdir celery_task
+COPY ./celery_task /celery_task
 
 #CMD ["celery", "-A", "celery_task_app.tasks", "worker", "--loglevel=INFO"]

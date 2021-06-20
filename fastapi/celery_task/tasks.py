@@ -1,6 +1,7 @@
 import logging
 from celery_task.yolov5s import *
 from celery import Task
+import os
 
 from celery_task.worker import celery
 
@@ -30,7 +31,7 @@ class PredictTask(Task):
         bind=True,
         base=PredictTask,
 )
-def predict_yolov5s(self, img_base64, url='http://localhost:8501/v1/models/yolov5s:predict'): # 'http://localhost:8501/v1/models/yolov5s:predict'
+def predict_yolov5s(self, img_base64, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/yolov5s:predict')): # 'http://localhost:8501/v1/models/yolov5s:predict'
     img = self.model.decode_base64(img_base64)
     results, time_taken = self.model.predict(img, url)
     return {'results': results, 'time_taken': time_taken}
