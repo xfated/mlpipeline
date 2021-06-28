@@ -24,3 +24,9 @@ docker-compose up -d
 
 cd tf_serving
 docker-compose up -d
+
+
+## Start
+minikube start
+kubectl apply -f kubernetes
+minikube tunnel

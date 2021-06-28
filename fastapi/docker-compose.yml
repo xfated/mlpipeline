@@ -55,7 +55,14 @@ services:
         command: "uvicorn app.main:app --host 0.0.0.0 --port 8000"
         networks:
             - proxynet
-            
+    
+    tfserving:
+        image: xfated/gymod_yolov5s_serving
+        ports:
+            - "8501:8501"
+        networks:
+            - proxynet
+
 volumes:
     rabbitmq_data:
         driver: local

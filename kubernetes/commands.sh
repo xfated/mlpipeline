@@ -1,1 +1,4 @@
-kubectl apply -f rabbitmq.yaml
+kubectl apply -f kubernetes
+
+# Expose external api
+minikube tunnel
