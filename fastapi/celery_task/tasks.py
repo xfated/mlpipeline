@@ -1,7 +1,7 @@
 import logging
-from celery_task.yolov5s import *
 from celery import Task
 import os
+from celery_task.ReviewEmbedding import RestReview
 
 from celery_task.worker import celery
 
@@ -22,16 +22,51 @@ class PredictTask(Task):
         """
         if not self.model:
             logging.info('Loading Model...')
-            self.model = Yolov5s()
+            tokenizer_path = os.getenv("TOKENIZER_PATH", "./token/review_emb-msmarco-distilbert-base-v3-v1")
+            rest_data_path = os.getenv("REST_DATA_PATH", "./restaurant_data")
+            self.model = RestReview(tokenizer_path, rest_data_path)
         return self.run(*args, **kwargs)
 
-
-# img: base64 encoded image 
+'''
+Match with all restaurants
+'''
 @celery.task(ignore_result=False,
         bind=True,
         base=PredictTask,
 )
-def predict_yolov5s(self, img_base64, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/yolov5s:predict')): # 'http://localhost:8501/v1/models/yolov5s:predict'
-    img = self.model.decode_base64(img_base64)
-    results, time_taken = self.model.predict(img, url)
+def predict_restaurants(self, query, top_k, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/rest_review_distilbert:predict')):
+    results, time_taken = self.model.predict(query, top_k=top_k, url=url)
+    return {'results': results, 'time_taken': time_taken}
+
+'''
+Match with restaurants in area
+'''
+@celery.task(ignore_result=False,
+        bind=True,
+        base=PredictTask,
+)
+def predict_restaurants_postal(self, query, top_k, postal_code, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/rest_review_distilbert:predict')):
+    results, time_taken = self.model.predict_postal(query, top_k=top_k, postal_code=postal_code, url=url)
+    return {'results': results, 'time_taken': time_taken}
+
+'''
+Random select from all
+'''
+@celery.task(ignore_result=False,
+        bind=True,
+        base=PredictTask,
+)
+def random_all(self, k):
+    results, time_taken = self.model.search_random(k=k)
+    return {'results': results, 'time_taken': time_taken}
+
+'''
+Random select from area
+'''
+@celery.task(ignore_result=False,
+        bind=True,
+        base=PredictTask,
+)
+def random_postal(self, k, postal_code):
+    results, time_taken = self.model.search_postal_random(k=k, postal_code=postal_code)
     return {'results': results, 'time_taken': time_taken}

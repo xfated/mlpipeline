@@ -1,5 +1,5 @@
 # Start tensorflow serving
-docker run -p 8501:8501 --name tfserving_yolov5s -t yolov5s_serving
+docker run -d -p 8501:8501 --name rest_review_distilbert -t rest_review_distilbert
 
 
 # Start celery
