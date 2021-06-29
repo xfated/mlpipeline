@@ -1,0 +1,14 @@
+name: celery_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9.5
+  - pip
+  - pip:
+    - requests==2.25.1
+    - celery==5.0.5
+    - numpy==1.20.2
+    - redis==3.5.3
+    - transformers==4.8.1
+    - faiss-cpu==1.7.0

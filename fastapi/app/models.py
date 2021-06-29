@@ -1,8 +1,10 @@
 from pydantic import BaseModel
 from typing import List
 
-class Image(BaseModel):
-    base64Img: str
+class Query(BaseModel):
+    input_text: str
+    top_k: int
+    postal: str
     
 class Task(BaseModel):
     """ Celery task representation """
@@ -11,9 +13,11 @@ class Task(BaseModel):
 
 class Prediction(BaseModel):
     """ Single prediction task result """
-    bbox: List[int]
-    cat: str
-    probability: float
+    name: str
+    address: str
+    tags: List[str]
+    about: str
+    summary: str
     
 class PredictionResponse(BaseModel):
     """ Prediction task response """

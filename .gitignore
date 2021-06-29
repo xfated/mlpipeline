@@ -1,1 +1,5 @@
-yolov5
+# Restaurant data
+**/restaurant_data
+**/__pycache__
+**/review_emb-msmarco-distilbert-base-v3-v1
+tf_serving
