@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.21.0 (992df58d8)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: tfserving
+  name: tfserving
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      io.kompose.service: tfserving
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.21.0 (992df58d8)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/restaurant_finder: "true"
+        io.kompose.service: tfserving
+    spec:
+      containers:
+      - image: xfated/sg_food_finder:embedder
+        imagePullPolicy: ""
+        name: tfserving
+        ports:
+        - containerPort: 8501
+        resources: {}
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes: null
+status: {}

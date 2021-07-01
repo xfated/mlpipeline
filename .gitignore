@@ -3,3 +3,5 @@
 **/__pycache__
 **/review_emb-msmarco-distilbert-base-v3-v1
 tf_serving
+
+*.index

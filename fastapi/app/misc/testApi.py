@@ -21,7 +21,7 @@ def postText():
 def getResult():
     global url
 
-    task_id = '70ba0d16-60db-4613-a68d-56bcd5a6fdff'
+    task_id = '331548d0-54f2-4b1b-9727-aa17b9c92d21'
     result_url = url + f'/{endpoint}/result/' + task_id
     res = requests.get(result_url)
 
