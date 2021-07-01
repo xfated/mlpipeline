@@ -17,11 +17,15 @@ def getResult(url, endpoint, task_id):
     res = requests.get(result_url)
 
     data = res.json()
-    preds = data['preds']
-    for res in preds:
-        print(res)
-        print()
-
+    try:
+        preds = data['preds']
+        for res in preds:
+            print(res)
+            print()
+    except Exception as e:
+        print(data)
+        # pass
+    
 # GET request at default endpoint, to check if service is up
 def test():
     r = requests.get(url)
@@ -30,11 +34,11 @@ def test():
 if __name__ == "__main__":
     ## Define http endpoint for testing
     # Testing with Google Kubernetes Engine
-    gke_ip = '34.126.146.206'
-    url = f'http://{gke_ip}:8000' 
+    # gke_ip = '34.126.146.206'
+    # url = f'http://{gke_ip}:8000' 
     
     # Testing on local setup
-    # url = 'http://127.0.0.1:8000'
+    url = 'http://127.0.0.1:8000'
 
     endpoint = 'restFinder'
     # endpoint = 'restFinderPostal'
@@ -48,7 +52,7 @@ if __name__ == "__main__":
     # postText(url, endpoint, query, postal)
     
     # Get result
-    task_id = '655f5f0f-20a0-4e5f-9be7-ede0e6a3c56d'
+    task_id = '4ac95814-be94-43a7-a2d4-c3107a4804e1'
     getResult(url, endpoint, task_id)
 
     # Basic test

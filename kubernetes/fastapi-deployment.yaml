@@ -44,7 +44,13 @@ spec:
         name: fastapi
         ports:
         - containerPort: 8000
-        resources: {}
+        resources:
+          requests:
+            cpu: 0.25
+            memory: "400Mi"
+          limits:
+            cpu: 0.25
+            memory: "400Mi"
       restartPolicy: Always
       serviceAccountName: ""
       volumes: null
