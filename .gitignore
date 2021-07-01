@@ -1,7 +1,14 @@
 # Restaurant data
 **/restaurant_data
-**/__pycache__
-**/review_emb-msmarco-distilbert-base-v3-v1
-tf_serving
 
+# Misk
+**/__pycache__
+
+# Transformers Model tokenizer
+**/review_emb-msmarco-distilbert-base-v3-v1
+
+# Index created by faiss
 *.index
+
+# some vscode settings I have
+.vscode

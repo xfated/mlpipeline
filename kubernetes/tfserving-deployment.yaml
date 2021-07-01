@@ -9,7 +9,7 @@ metadata:
     io.kompose.service: tfserving
   name: tfserving
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       io.kompose.service: tfserving
@@ -30,7 +30,13 @@ spec:
         name: tfserving
         ports:
         - containerPort: 8501
-        resources: {}
+        resources:
+          requests:
+            cpu: 1
+            memory: "4Gi"
+          limits:
+            cpu: 2
+            memory: "4Gi"
       restartPolicy: Always
       serviceAccountName: ""
       volumes: null
