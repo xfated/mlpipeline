@@ -2,8 +2,8 @@ import cv2
 import requests
 import json
 
-def postText(url, endpoint, query, postal, top_k=5):
-    data = {'input_text': query, 'top_k':5, 'postal':postal}
+def postText(url, endpoint, query, postal, region, top_k=5):
+    data = {'input_text': query, 'top_k':5, 'postal':postal, 'region':region}
 
     pred_url = url + f'/{endpoint}/predict'
     res = requests.post(pred_url, json=data)
@@ -40,20 +40,23 @@ if __name__ == "__main__":
     # Testing on local setup
     url = 'http://127.0.0.1:8000'
 
-    endpoint = 'restFinder'
+    # endpoint = 'restFinder'
     # endpoint = 'restFinderPostal'
     # endpoint = 'restRandom'
     # endpoint = 'restRandomPostal'
+    endpoint = 'restFinderRegion'
+    # endpoint = 'restRandomRegion'
 
     ## Send HTTP request
     # Start task
-    # query = 'I want some takoyaki'
-    # postal = '238'
-    # postText(url, endpoint, query, postal)
+    # query = 'Thai steamboat'
+    # postal = '23'
+    # region = 'North'
+    # postText(url, endpoint, query, postal, region)
     
     # Get result
-    task_id = '4ac95814-be94-43a7-a2d4-c3107a4804e1'
+    task_id = 'f055882f-d429-4f62-8616-ed905f935287'
     getResult(url, endpoint, task_id)
 
-    # Basic test
+    # Basic test 
     # test()
