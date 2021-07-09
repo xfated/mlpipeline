@@ -1,6 +1,7 @@
 #/bin/bash
 
 ## For local testing
+# Creating on serving image https://www.tensorflow.org/tfx/serving/docker
 # Start tensorflow serving
 docker run -d -p 8501:8501 --name rest_review_distilbert -t rest_review_distilbert
 

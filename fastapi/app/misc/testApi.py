@@ -1,9 +1,8 @@
-import cv2
 import requests
 import json
 
 def postText(url, endpoint, query, postal, region, top_k=5):
-    data = {'input_text': query, 'top_k':5, 'postal':postal, 'region':region}
+    data = {'input_text': query, 'top_k':top_k, 'postal':postal, 'region':region}
 
     pred_url = url + f'/{endpoint}/predict'
     res = requests.post(pred_url, json=data)
@@ -39,24 +38,30 @@ if __name__ == "__main__":
     
     # Testing on local setup
     url = 'http://127.0.0.1:8000'
+ 
+    endpoints = ['restFinder',       # 0
+                'restFinder',        # 1
+                'restFinderPostal',  # 2 
+                'restFinderRegion',  # 3
+                'restRandom',        # 4
+                'restRandomPostal',  # 5
+                'restRandomRegion',  # 6
+                'restTopk',          # 7
+                'restTopkPostal',    # 8
+                'restTopkRegion']    # 9
 
-    # endpoint = 'restFinder'
-    # endpoint = 'restFinderPostal'
-    # endpoint = 'restRandom'
-    # endpoint = 'restRandomPostal'
-    endpoint = 'restFinderRegion'
-    # endpoint = 'restRandomRegion'
-
+    endpoint = endpoints[0]
     ## Send HTTP request
     # Start task
-    # query = 'Thai steamboat'
-    # postal = '23'
-    # region = 'North'
-    # postText(url, endpoint, query, postal, region)
+    query = 'Thai steamboat'
+    postal = '64'
+    region = 'North'
+    top_k = 3
+    # for endpoint in endpoints:
+    # postText(url, endpoint, query, postal, region, top_k)
     
     # Get result
-    task_id = 'f055882f-d429-4f62-8616-ed905f935287'
+    task_id = 'fb6c6688-1eb4-4a89-bc73-a269974f65db'
     getResult(url, endpoint, task_id)
-
     # Basic test 
     # test()

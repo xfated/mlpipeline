@@ -30,8 +30,8 @@ services:
         environment:
             - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
             - CELERY_BACKEND_URL=redis://redis:6379/0
-            - TFSERVING_URL=http://tfserving:8501/v1/models/rest_review_distilbert:predict
-            - TOKENIZER_PATH=/data/token/review_emb-msmarco-distilbert-base-v3-v1
+            - TFSERVING_URL=http://tfserving:8501/v1/models/rest_review_distilbert_base:predict
+            - TOKENIZER_PATH=/data/token/msmarco-distilbert-base-v4
             - REST_DATA_PATH=/data/restaurant_data
         volumes:
             - "./celery_task:/celery_task"
@@ -51,7 +51,7 @@ services:
         environment:
             - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
             - CELERY_BACKEND_URL=redis://redis:6379/0
-            - TFSERVING_URL=http://tfserving:8501/v1/models/rest_review_distilbert:predict
+            - TFSERVING_URL=http://tfserving:8501/v1/models/rest_review_distilbert_base:predict
         volumes:
             - "./app:/app"
         command: "uvicorn app.main:app --host 0.0.0.0 --port 8000"

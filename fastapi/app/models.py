@@ -5,6 +5,7 @@ class Query(BaseModel):
     input_text: str
     top_k: int
     postal: str
+    region: str
     
 class Task(BaseModel):
     """ Celery task representation """
@@ -18,6 +19,8 @@ class Prediction(BaseModel):
     tags: List[str]
     about: str
     summary: str
+    link: str
+    rating: float
     
 class PredictionResponse(BaseModel):
     """ Prediction task response """
