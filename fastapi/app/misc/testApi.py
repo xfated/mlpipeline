@@ -11,11 +11,12 @@ def postText(url, endpoint, query, postal, region, top_k=5):
     print(res.text)
 
 ## Get result of Celery task. 
-def getResult(url, endpoint, task_id):
-    result_url = url + f'/{endpoint}/result/' + task_id
+def getResult(url, task_id):
+    result_url = url + f'/result/' + task_id
     res = requests.get(result_url)
 
     data = res.json()
+    print(data)
     try:
         preds = data['preds']
         for res in preds:
@@ -37,10 +38,11 @@ if __name__ == "__main__":
     # url = f'http://{gke_ip}:8000' 
     
     # Testing on local setup
-    url = 'http://127.0.0.1:8000'
- 
+    # url = 'http://127.0.0.1:8000'
+    url = 'http://kaiyangtay.xyz:80'
+
     endpoints = ['restFinder',       # 0
-                'restFinder',        # 1
+                'restFinderSorted',        # 1
                 'restFinderPostal',  # 2 
                 'restFinderRegion',  # 3
                 'restRandom',        # 4
@@ -53,15 +55,16 @@ if __name__ == "__main__":
     endpoint = endpoints[0]
     ## Send HTTP request
     # Start task
-    query = 'Thai steamboat'
-    postal = '64'
+    query = 'chicken rice'
+    postal = '73'
     region = 'North'
-    top_k = 3
+    top_k = 5
     # for endpoint in endpoints:
     # postText(url, endpoint, query, postal, region, top_k)
     
     # Get result
-    task_id = 'fb6c6688-1eb4-4a89-bc73-a269974f65db'
-    getResult(url, endpoint, task_id)
+    task_id = '45c47e87-83a5-4657-a168-9c040b2fdaf7'
+    getResult(url, task_id)
+
     # Basic test 
     # test()

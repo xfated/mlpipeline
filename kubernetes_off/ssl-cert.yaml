@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: ssl-cert
+spec:
+  domains:
+    - kaiyangtay.xyz
+    - www.kaiyangtay.xyz

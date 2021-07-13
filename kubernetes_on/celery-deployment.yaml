@@ -6,13 +6,13 @@ metadata:
     kompose.version: 1.21.0 (992df58d8)
   creationTimestamp: null
   labels:
-    io.kompose.service: fastapi
-  name: fastapi
+    io.kompose.service: celery
+  name: celery
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: fastapi
+      io.kompose.service: celery
   strategy: {}
   template:
     metadata:
@@ -22,35 +22,36 @@ spec:
       creationTimestamp: null
       labels:
         io.kompose.network/restaurant_finder: "true"
-        io.kompose.service: fastapi
+        io.kompose.service: celery
     spec:
       containers:
       - args:
-        - uvicorn
-        - app.main:app
-        - --host
-        - 0.0.0.0
-        - --port
-        - "8000"
+        - celery
+        - -A
+        - celery_task.tasks
+        - worker
+        - --loglevel=INFO
         env:
         - name: CELERY_BACKEND_URL
           value: redis://redis:6379/0
         - name: CELERY_BROKER_URL
           value: amqp://guest:guest@rabbitmq:5672//
+        - name: REST_DATA_PATH
+          value: /data/restaurant_data
         - name: TFSERVING_URL
-          value: http://tfserving:8501/v1/models/rest_review_distilbert:predict
-        image: xfated/sg_food_finder:httpservicecors_v2
+          value: http://tfserving:8501/v1/models/rest_review_distilbert_base:predict
+        - name: TOKENIZER_PATH
+          value: /data/token/msmarco-distilbert-base-v4
+        image: xfated/sg_food_finder:celery_v4
         imagePullPolicy: ""
-        name: fastapi
-        ports:
-        - containerPort: 8000
+        name: celery
         resources:
           requests:
             cpu: 0.25
-            memory: "400Mi"
+            memory: "1Gi"
           limits:
             cpu: 0.25
-            memory: "400Mi"
+            memory: "1Gi"
       restartPolicy: Always
       serviceAccountName: ""
       volumes: null

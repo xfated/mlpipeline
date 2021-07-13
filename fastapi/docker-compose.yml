@@ -59,7 +59,7 @@ services:
             - proxynet
 
     tfserving:
-        image: "rest_review_distilbert"
+        image: "rest_review_distilbert_base"
         ports:
             - "8501:8501"
         networks:

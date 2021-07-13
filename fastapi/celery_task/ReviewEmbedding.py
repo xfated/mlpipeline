@@ -129,6 +129,7 @@ class RestReview:
             return [os.path.join(root, name) for name in files]
 
     # Get embedding from tfserving model
+    # Returns embedding, err
     def get_emb(self, text, url):
         # Tokenize text
         model_input = self.tokenizer.encode_plus(text, truncation=True, max_length=self.max_length)
@@ -140,12 +141,15 @@ class RestReview:
             "signature_name": "serving_default",
             "instances": [model_input]
         })
+        try:
+            json_response = requests.post(url, data=data, headers=headers)
+        except Exception as e:
+            return None, type(e).__name__
 
-        json_response = requests.post(url, data=data, headers=headers)
         embedding = json.loads(json_response.text)['predictions'][0]
         embedding = np.asarray(embedding)
         
-        return embedding
+        return embedding, None
     
     '''
     Search faiss
@@ -162,13 +166,18 @@ class RestReview:
         results =  [self.restaurant_info[idx] for idx in top_k_ids]
         return results
 
+    '''
+    Return results, time_taken, error string
+    '''
     def predict(self, text, top_k, url):
         t=time.time()
-        embedding = self.get_emb(text, url)   
+        embedding, err = self.get_emb(text, url)
+        if err:
+            return [], 0, err
         embedding = np.array(embedding).astype(np.float32)     
         results = self.search(embedding, top_k=top_k)
         time_taken = time.time() - t
-        return results, time_taken
+        return results, time_taken, ''
 
     '''
     Similar search, but restrict to postal code
@@ -185,11 +194,13 @@ class RestReview:
 
     def predict_postal(self, text, top_k, postal_code, url):
         t=time.time()
-        embedding = self.get_emb(text, url)   
+        embedding, err = self.get_emb(text, url)
+        if err:
+            return [], 0, err 
         embedding = np.array(embedding).astype(np.float32)     
         results = self.search_postal(embedding, top_k=top_k, postal_code=postal_code)
         time_taken = time.time() - t
-        return results, time_taken
+        return results, time_taken, ''
     
     '''
     Similar search, but restrict to region
@@ -206,11 +217,13 @@ class RestReview:
 
     def predict_region(self, text, top_k, region, url):
         t=time.time()
-        embedding = self.get_emb(text, url)   
+        embedding, err = self.get_emb(text, url)
+        if err:
+            return [], 0, err  
         embedding = np.array(embedding).astype(np.float32)     
         results = self.search_region(embedding, top_k=top_k, region=region)
         time_taken = time.time() - t
-        return results, time_taken
+        return results, time_taken, ''
 
     '''
     Random sample k restaurants

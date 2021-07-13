@@ -27,4 +27,5 @@ class PredictionResponse(BaseModel):
     task_id: str
     preds: List[Prediction]
     time_taken:float
+    error: str
 

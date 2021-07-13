@@ -31,10 +31,10 @@ async def pred_rest(query: Query):
     return {'task_id': str(task_id), 'status': 'Processing'}
 
 ## Search all restaurants Sorted
-@app.post('/restFinderSorted/predict', response_model=Task, status_code=202)
-async def pred_rest(query: Query):
-    task_id = predict_restaurants_sorted.delay(query.input_text, query.top_k)
-    return {'task_id': str(task_id), 'status': 'Processing'}
+# @app.post('/restFinderSorted/predict', response_model=Task, status_code=202)
+# async def pred_rest(query: Query):
+#     task_id = predict_restaurants_sorted.delay(query.input_text, query.top_k)
+#     return {'task_id': str(task_id), 'status': 'Processing'}
 
 # @app.get('/restFinder/result/{task_id}', response_model=PredictionResponse, status_code=200,
 #             responses={202: {'model': Task, 'description': 'Accepted, Not Ready'}})
@@ -56,10 +56,10 @@ async def pred_rest_postal(query: Query):
     return {'task_id': str(task_id), 'status': 'Processing'}
 
 ## Search in Area Sorted
-@app.post('/restFinderPostalSorted/predict', response_model=Task, status_code=202)
-async def pred_rest_postal(query: Query):
-    task_id = predict_restaurants_postal_sorted.delay(query.input_text, query.top_k, query.postal)
-    return {'task_id': str(task_id), 'status': 'Processing'}
+# @app.post('/restFinderPostalSorted/predict', response_model=Task, status_code=202)
+# async def pred_rest_postal(query: Query):
+#     task_id = predict_restaurants_postal_sorted.delay(query.input_text, query.top_k, query.postal)
+#     return {'task_id': str(task_id), 'status': 'Processing'}
 
 # @app.get('/restFinderPostal/result/{task_id}', response_model=PredictionResponse, status_code=200,
 #             responses={202: {'model': Task, 'description': 'Accepted, Not Ready'}})
@@ -81,10 +81,10 @@ async def pred_rest_region(query: Query):
     return {'task_id': str(task_id), 'status': 'Processing'}
 
 ## Search in Region Sorted
-@app.post('/restFinderRegionSorted/predict', response_model=Task, status_code=202)
-async def pred_rest_region(query: Query):
-    task_id = predict_restaurants_region_sorted.delay(query.input_text, query.top_k, query.region)
-    return {'task_id': str(task_id), 'status': 'Processing'}
+# @app.post('/restFinderRegionSorted/predict', response_model=Task, status_code=202)
+# async def pred_rest_region(query: Query):
+#     task_id = predict_restaurants_region_sorted.delay(query.input_text, query.top_k, query.region)
+#     return {'task_id': str(task_id), 'status': 'Processing'}
 
 # @app.get('/restFinderRegion/result/{task_id}', response_model=PredictionResponse, status_code=200,
 #             responses={202: {'model': Task, 'description': 'Accepted, Not Ready'}})
@@ -224,7 +224,8 @@ async def topk_result_region(task_id):
     output = task.get()
     results = output['results']
     time_taken = output['time_taken']
-    return {'task_id': task_id, 'status': 'Success', 'preds': results, 'time_taken': time_taken}
+    err_msg = output['err']
+    return {'task_id': task_id, 'status': 'Success', 'preds': results, 'time_taken': time_taken, 'error': err_msg}
 
 
 if __name__ == "__main__":
