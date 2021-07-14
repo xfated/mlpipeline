@@ -1,40 +1,15 @@
 import logging
-from celery import Task
 import os
-from celery_task.ReviewEmbedding import RestReview
 from celery_task.worker import celery
-
-class PredictTask(Task):
-    """
-    Abstraction of Celery's Task class to support loading ML model.
-    """
-    abstract = True
-
-    def __init__(self):
-        super().__init__()
-        self.model = None
-
-    def __call__(self, *args, **kwargs):
-        """
-        Load model on first call
-        Avoids the need to load model on each task request
-        """
-        if not self.model:
-            logging.info('Loading Model...')
-            tokenizer_path = os.getenv("TOKENIZER_PATH", "./token/review_emb-msmarco-distilbert-base-v3-v1")
-            rest_data_path = os.getenv("REST_DATA_PATH", "./restaurant_data")
-            self.model = RestReview(tokenizer_path, rest_data_path)
-        return self.run(*args, **kwargs)
-
+from celery_task.worker import model
 '''
 Match with all restaurants
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def predict_restaurants(self, query, top_k, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/rest_review_distilbert:predict')):
-    results, time_taken, err = self.model.predict(query, top_k=top_k, url=url)
+    results, time_taken, err = model.predict(query, top_k=top_k, url=url)
     return {'results': results, 'time_taken': time_taken, 'err': err}
 
 # '''
@@ -45,7 +20,7 @@ def predict_restaurants(self, query, top_k, url=os.getenv("TFSERVING_URL", 'http
 #         base=PredictTask,
 # )
 # def predict_restaurants_sorted(self, query, top_k, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/rest_review_distilbert:predict')):
-#     results, time_taken = self.model.predict(query, top_k=top_k, url=url)
+#     results, time_taken = model.predict(query, top_k=top_k, url=url)
 #     # Sort based on rating. Desc
 #     results = [(result, result['rating']) for result in results]
 #     sorted(results,key=lambda x:(-x[1],x[0]))
@@ -56,11 +31,10 @@ def predict_restaurants(self, query, top_k, url=os.getenv("TFSERVING_URL", 'http
 Match with restaurants in area
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def predict_restaurants_postal(self, query, top_k, postal_code, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/rest_review_distilbert:predict')):
-    results, time_taken, err = self.model.predict_postal(query, top_k=top_k, postal_code=postal_code, url=url)
+    results, time_taken, err = model.predict_postal(query, top_k=top_k, postal_code=postal_code, url=url)
     return {'results': results, 'time_taken': time_taken, 'err': err}
 
 # '''
@@ -71,7 +45,7 @@ def predict_restaurants_postal(self, query, top_k, postal_code, url=os.getenv("T
 #         base=PredictTask,
 # )
 # def predict_restaurants_postal_sorted(self, query, top_k, postal_code, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/rest_review_distilbert:predict')):
-#     results, time_taken = self.model.predict_postal(query, top_k=top_k, postal_code=postal_code, url=url)
+#     results, time_taken = model.predict_postal(query, top_k=top_k, postal_code=postal_code, url=url)
 #     # Sort based on rating. Desc
 #     results = [(result, result['rating']) for result in results]
 #     sorted(results,key=lambda x:(-x[1],x[0]))
@@ -83,11 +57,10 @@ def predict_restaurants_postal(self, query, top_k, postal_code, url=os.getenv("T
 Match with restaurants in region
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def predict_restaurants_region(self, query, top_k, region, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/rest_review_distilbert:predict')):
-    results, time_taken, err = self.model.predict_region(query, top_k=top_k, region=region, url=url)
+    results, time_taken, err = model.predict_region(query, top_k=top_k, region=region, url=url)
     return {'results': results, 'time_taken': time_taken, 'err': err}
 
 # '''
@@ -98,7 +71,7 @@ def predict_restaurants_region(self, query, top_k, region, url=os.getenv("TFSERV
 #         base=PredictTask,
 # )
 # def predict_restaurants_region_sorted(self, query, top_k, region, url=os.getenv("TFSERVING_URL", 'http://localhost:8501/v1/models/rest_review_distilbert:predict')):
-#     results, time_taken = self.model.predict_region(query, top_k=top_k, region=region, url=url)
+#     results, time_taken = model.predict_region(query, top_k=top_k, region=region, url=url)
 #     # Sort based on rating. Desc
 #     results = [(result, result['rating']) for result in results]
 #     sorted(results,key=lambda x:(-x[1],x[0]))
@@ -110,44 +83,40 @@ def predict_restaurants_region(self, query, top_k, region, url=os.getenv("TFSERV
 Random select from all
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def random_all(self, k):
-    results, time_taken = self.model.search_random(k=k)
+    results, time_taken = model.search_random(k=k)
     return {'results': results, 'time_taken': time_taken, 'err': ''}
 
 '''
 Random select from area
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def random_postal(self, k, postal_code):
-    results, time_taken = self.model.search_postal_random(k=k, postal_code=postal_code)
+    results, time_taken = model.search_postal_random(k=k, postal_code=postal_code)
     return {'results': results, 'time_taken': time_taken, 'err': ''}
 
 '''
 Random select from region
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def random_region(self, k, region):
-    results, time_taken = self.model.search_region_random(k=k, region=region)
+    results, time_taken = model.search_region_random(k=k, region=region)
     return {'results': results, 'time_taken': time_taken, 'err': ''}
 
 '''
 Select topk from all
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def topk_all(self, k):
-    results, time_taken = self.model.search_topk(k=k)
+    results, time_taken = model.search_topk(k=k)
     return {'results': results, 'time_taken': time_taken, 'err': ''}
 
 
@@ -155,20 +124,18 @@ def topk_all(self, k):
 Select topk from area
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def topk_postal(self, k, postal_code):
-    results, time_taken = self.model.search_postal_topk(k=k, postal_code=postal_code)
+    results, time_taken = model.search_postal_topk(k=k, postal_code=postal_code)
     return {'results': results, 'time_taken': time_taken, 'err': ''}
 
 '''
 Select topk from region
 '''
 @celery.task(ignore_result=False,
-        bind=True,
-        base=PredictTask,
+        bind=True
 )
 def topk_region(self, k, region):
-    results, time_taken = self.model.search_region_topk(k=k, region=region)
+    results, time_taken = model.search_region_topk(k=k, region=region)
     return {'results': results, 'time_taken': time_taken, 'err': ''}

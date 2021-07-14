@@ -7,9 +7,9 @@ import time
 import os
 import faiss
 import re
-import random
 
 url = 'http://localhost:8501/v1/models/rest_review_distilbert:predict'
+
 
 class RestReview:
     """ Wrapper for loading and serving yolov5s model"""
