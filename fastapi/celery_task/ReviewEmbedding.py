@@ -17,7 +17,6 @@ class RestReview:
     def __init__(self, tokenizer_path, rest_data_root):
         self.max_length = 512
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(tokenizer_path, use_fast=True)
-
         # Load restaurant embeddings
         filepaths = self.get_filepaths(rest_data_root)
         ## Holds all restaurant info
@@ -162,7 +161,8 @@ class RestReview:
         top_k = min(top_k, len(self.restaurant_info))
         top_k = self.index.search(np.array([query_vector]), top_k)
         top_k_ids = top_k[1].tolist()[0]
-        top_k_ids = list(np.unique(top_k_ids))
+        # top_k_ids = list(np.unique(top_k_ids))
+        top_k_ids = list(top_k_ids)
         results =  [self.restaurant_info[idx] for idx in top_k_ids]
         return results
 
@@ -188,7 +188,8 @@ class RestReview:
             return []
         top_k = self.postal_index[postal_code].search(np.array([query_vector]), top_k)
         top_k_ids = top_k[1].tolist()[0]
-        top_k_ids = list(np.unique(top_k_ids))
+        # top_k_ids = list(np.unique(top_k_ids))
+        top_k_ids = list(top_k_ids)
         results =  [self.rest_postal_info[postal_code][idx] for idx in top_k_ids]
         return results
 
@@ -211,7 +212,8 @@ class RestReview:
             return []
         top_k = self.region_index[region].search(np.array([query_vector]), top_k)
         top_k_ids = top_k[1].tolist()[0]
-        top_k_ids = list(np.unique(top_k_ids))
+        # top_k_ids = list(np.unique(top_k_ids))
+        top_k_ids = list(top_k_ids)
         results =  [self.rest_region_info[region][idx] for idx in top_k_ids]
         return results
 
