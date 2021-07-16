@@ -39,7 +39,7 @@ spec:
           value: amqp://guest:guest@rabbitmq:5672//
         - name: TFSERVING_URL
           value: http://tfserving:8501/v1/models/rest_review_distilbert_base:predict
-        image: xfated/sg_food_finder:httpservicecors_v4
+        image: xfated/sg_food_finder:httpservicecors_v5
         imagePullPolicy: ""
         name: fastapi
         ports:
