@@ -1,0 +1,79 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tfserving-scaler
+  namespace: default
+rules:
+- apiGroups: ["apps", "extensions"]
+  resources: ["deployments"]
+  verbs: ["patch", "get", "list"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tfserving-scaler-binding
+subjects:
+- kind: ServiceAccount
+  name: default
+roleRef:
+  kind: Role
+  name: tfserving-scaler
+  apiGroup: ""
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: off-tfserving
+spec:
+  schedule: "0 13 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: default
+          containers:
+          - name: on-tfserving
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - kubectl patch deployment tfserving -p '{"spec":{"replicas":0}}'
+            resources:
+              requests:
+                cpu: 0.1
+                memory: "100Mi"
+              limits:
+                cpu: 0.1
+                memory: "100Mi"
+          restartPolicy: OnFailure
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: on-tfserving
+spec:
+  schedule: "0 1 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: default
+          containers:
+          - name: off-tfserving
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - kubectl patch deployment tfserving -p '{"spec":{"replicas":1}}'
+            resources:
+              requests:
+                cpu: 0.1
+                memory: "100Mi"
+              limits:
+                cpu: 0.1
+                memory: "100Mi"
+          restartPolicy: OnFailure
+    

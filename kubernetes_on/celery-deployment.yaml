@@ -42,7 +42,7 @@ spec:
           value: http://tfserving:8501/v1/models/rest_review_distilbert_base:predict
         - name: TOKENIZER_PATH
           value: /data/token/msmarco-distilbert-base-v4
-        image: xfated/sg_food_finder:celery_v5
+        image: xfated/sg_food_finder:celery_v6
         imagePullPolicy: ""
         name: celery
         resources:
